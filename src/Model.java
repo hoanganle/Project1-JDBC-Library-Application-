@@ -15,9 +15,9 @@ import javax.swing.DefaultComboBoxModel;
 public class Model {
 	private ResultSet myRslt;
 	
-	public Model() {
+	public Model(ResultSet myRslt) {
 		
-		myRslt=null;
+		this.myRslt=myRslt;
 		
 	}
 
@@ -29,9 +29,9 @@ public class Model {
 		this.myRslt = myRslt;
 	}
 	
-	public  DefaultComboBoxModel<String> getComboBoxModel() {
+	public  DefaultComboBoxModel<String> getComboBoxModel(String str1,String str2) {
 		
-		return DbUtility.resultSetToDefaultComboBoxModel(myRslt);
+		return DbUtility.resultSetToDefaultComboBoxModel(myRslt,str1,str2);
 	}
 	
    public TableModel getTableModel() {

@@ -25,7 +25,7 @@ public class DbUtility
    * Returns: A DefaultComboBoxModel<String> object that has been type safetied to String
    */	
 	
-	public static DefaultComboBoxModel<String> resultSetToDefaultComboBoxModel(ResultSet rs)
+	public static DefaultComboBoxModel<String> resultSetToDefaultComboBoxModel(ResultSet rs,String str1, String str2)
 	{
 		DefaultComboBoxModel<String> model = null;
 		try
@@ -38,7 +38,11 @@ public class DbUtility
 			{
 				//concatenate the data from the two columns and separate with a comma
 				//NOTE: Using the column_name version of the getString() method here rather than column index numbers
-				names.add(rs.getString("Last_name") + "," + rs.getString("first_Name"));
+				if(str2.isEmpty())
+					names.add(rs.getString(str1));
+				else
+					names.add(rs.getString(str1) + "," + rs.getString(str2));
+				//names.add(rs.getString("Last_name") + "," + rs.getString("first_Name"));
 			}//end while
 			
 			//now pass the vector to the constructor for the DefaultComboBoxModel object
