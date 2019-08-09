@@ -24,17 +24,17 @@ public class View extends JFrame {
 	JTabbedPane t1; //main tab panel
 	JTabbedPane jTabP; 
 	JPanel p2;	
-
+	JTable returnbookJTable ,booklisTable ;
 	JButton addBookButton;
 	JRadioButton rb1,rb2,rb3,rb4,rb5;
-	JComboBox<String> jc1, jc2;
+	JComboBox<String> jc1, jc2 ,borrowListBox,borrowerComboBox;
 	JButton jb1;
-	 DefaultComboBoxModel<String> authorRsltComBox,subjectRsltComBox,borrowerRsltComBox;
-	JTextField lastNameTextField,firstNameTextFieldtext,emailTextField;
+	 DefaultComboBoxModel<String> authorRsltComBox,subjectRsltComBox,borrowerRsltComBox,borrowerRsltComBox2;
+	JTextField lastNameTextField,firstNameTextFieldtext,emailTextField,commenTextField;
    JRadioButton addBorroweRadioButton ,updateBorroweRadioButton;
   	
    JTextField titleTextField,isbnJTextField,editionNumJTextField,subjecTextField,authorLastNameJTextField,authorFirstNameJTextField;
-   JLabel BorrowMessagJLabel,bookMessagJLabel;
+   JLabel BorrowMessagJLabel,bookMessagJLabel,  returnMessJLabel,bookLoanMessageJLabel,datedueJLabel2;
    JCheckBox addMoreAuthourCheckBox;
 	public View () throws SQLException {
 		super("Gui");//will go into title bar		
@@ -117,13 +117,13 @@ public class View extends JFrame {
      borrowerPanel.setLayout(new GridLayout(6,2));
     
      //set combo box 
-     queryAllBorrower();
+     borrowerRsltComBox = queryAllBorrower();
      
 	  //Set all components
       addBorroweRadioButton = new JRadioButton("Add a new borrower");   
      addBorroweRadioButton.setSelected(true);
       updateBorroweRadioButton =new JRadioButton("Update borrower");
-     JComboBox<String> borrowerComboBox =new JComboBox<String>(borrowerRsltComBox);
+      borrowerComboBox =new JComboBox<String>(borrowerRsltComBox);
      borrowerComboBox.setVisible(false);
      
      JLabel   lastNameJLabel = new JLabel("Last Name:");
@@ -164,9 +164,7 @@ public class View extends JFrame {
 	   	lastNameTextField.setText(lastName);
 	   	firstNameTextFieldtext.setText(firstName);
      });
-     
-     borrowerComboBox.addItemListener((e)->{
-   	  
+     borrowerComboBox.addActionListener((e)->{
    	  String nameString = borrowerComboBox.getSelectedItem().toString();
 	   	String []nameStrings = nameString.split(",");
 	   	String lastName = nameStrings[0];
@@ -174,6 +172,7 @@ public class View extends JFrame {
 	   	lastNameTextField.setText(lastName);
 	   	firstNameTextFieldtext.setText(firstName);
      });
+
      
      //Add components to panel
      borrowerPanel.add(addBorroweRadioButton);
@@ -195,7 +194,7 @@ public class View extends JFrame {
      borrowerMainPanel.setLayout(new BorderLayout());
      
      borrowerMainPanel.add(borrowerPanel,BorderLayout.CENTER);
-     BorrowMessagJLabel =new JLabel(" ");
+     BorrowMessagJLabel =new JLabel("Message:");
      BorrowMessagJLabel.setBorder(BorderFactory.createEmptyBorder(10,10,10,0));
      borrowerMainPanel.add(BorrowMessagJLabel,BorderLayout.SOUTH);
      jTabP.addTab("Borrower", borrowerMainPanel);
@@ -258,7 +257,7 @@ public class View extends JFrame {
      bookMainPanel.setLayout(new BorderLayout());
      
      bookMainPanel.add(bookJPanel,BorderLayout.CENTER);
-     bookMessagJLabel =new JLabel(" ");
+     bookMessagJLabel =new JLabel("Message:");
      bookMessagJLabel.setBorder(BorderFactory.createEmptyBorder(10,10,10,0));
      bookMainPanel.add(bookMessagJLabel,BorderLayout.SOUTH);
      jTabP.addTab("Book", bookMainPanel);
@@ -268,28 +267,43 @@ public class View extends JFrame {
      JPanel bookLoanJPanel=new JPanel(new BorderLayout());  
      t1.addTab("Loan",bookLoanJPanel); 
 	  // 
-	  JTable booklisTable =new JTable(queryBooksInLibrary());   
+	   booklisTable =new JTable(queryBooksInLibrary());   
 	  JScrollPane bookListJPanel =new JScrollPane(booklisTable); 
-	  bookListJPanel.setPreferredSize(new Dimension(0,150));
+	  bookListJPanel.setPreferredSize(new Dimension(0,120));
 	  bookLoanJPanel.add(bookListJPanel,BorderLayout.NORTH);
-	  JPanel bookFormJPanel =new JPanel(new GridLayout(5,2));
+	  JPanel bookFormJPanel =new JPanel(new GridLayout(6,2));
 	 
 	  JLabel borrererJLabel = new JLabel("Borrower:");
-	  JComboBox<String> borrowListBox =new JComboBox<String>(borrowerRsltComBox);
+	  borrowerRsltComBox2 = queryAllBorrower();
+	  borrowListBox =new JComboBox<String>(borrowerRsltComBox2);
 	 
 	  JLabel comnentJLabel = new JLabel("Comment:");
-	  JTextField commenTextField = new JTextField();
+	   commenTextField = new JTextField();
 	  JLabel dateJLabel = new JLabel("Date Out:");  
 	  //get current date
-	  DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");  
+	  DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");  
 	  LocalDateTime now = LocalDateTime.now();
 	  JLabel dateJLabel2 =new JLabel(dtf.format(now)); 
 	  
 	  //due date
+	  JRadioButton oneWeekButton =new JRadioButton("One week");
+	  JRadioButton twoWeekButton =new JRadioButton("Two week");
+	  twoWeekButton.setSelected(true);
+	  ButtonGroup bg2  =new ButtonGroup();
+	  bg2.add(oneWeekButton);
+	  bg2.add(twoWeekButton);
+	  
 	  JLabel dateDueJLabel = new JLabel("Date Due:");	 
-	  JLabel datedueJLabel2 = new JLabel(dtf.format( now.plusDays(15)));
+	   datedueJLabel2 = new JLabel(dtf.format( now.plusDays(14)));
 	  JButton submitButton =new JButton("Submit");
 	  
+	  // 
+	  oneWeekButton.addItemListener((e)->{
+		  datedueJLabel2.setText(dtf.format( now.plusDays(7)));
+	  });
+	  twoWeekButton.addItemListener((e)->{
+		  datedueJLabel2.setText(dtf.format( now.plusDays(14)));
+	  });
 	  
 	  bookFormJPanel.add(borrererJLabel);
 	  bookFormJPanel.add(borrowListBox);
@@ -297,45 +311,44 @@ public class View extends JFrame {
 	  bookFormJPanel.add(commenTextField);
 	  bookFormJPanel.add(dateJLabel);
 	  bookFormJPanel.add(dateJLabel2);
+	  bookFormJPanel.add(oneWeekButton);
+	  bookFormJPanel.add(twoWeekButton);
 	  bookFormJPanel.add(dateDueJLabel);
 	  bookFormJPanel.add(datedueJLabel2);
 	  bookFormJPanel.add(submitButton);
 	  bookLoanJPanel.add(bookFormJPanel, BorderLayout.CENTER);
 	  
-	  JLabel  bookLoanMessageJLabel = new JLabel("Message:");
+	    bookLoanMessageJLabel = new JLabel("Message:");
 	  bookLoanMessageJLabel.setBorder(BorderFactory.createEmptyBorder(10,10,10,0));
 	  bookLoanJPanel.add(new JPanel().add(bookLoanMessageJLabel),BorderLayout.SOUTH);
 	  
 	  
-	  submitButton.addActionListener((e)->{
-		  try {
-		  int rowIndex = booklisTable.getSelectedRow();
-		 String title = (String) booklisTable.getValueAt(rowIndex, 0);
-		 
-		 String commentString  = commenTextField.getText();
-		 String nameString = borrowListBox.getSelectedItem().toString();
-	   	String []nameStrings = nameString.split(",");
-	   	String lastName = nameStrings[0];
-	   	String firstName = nameStrings[1];
-		   controller.bookLoan(title,commentString,lastName,firstName);
-		   commenTextField.setText("");
-		  
-		   bookLoanMessageJLabel.setText(lastName +" "+firstName+" borrowed "+title);
-		   
-		   //update book list
-		   TableModel tableModel =queryBooksInLibrary();
-		   booklisTable.setModel(tableModel);
-		  }
-			catch(SQLException ex)
-			{
-				System.out.println("SQL Exception, message is: " + ex.getMessage());
-			}
-			catch(Exception ex)
-			{
-				System.out.println("Some other Exception, message is: " + ex.getMessage());
-			}
-	  });
+	  submitButton.addActionListener(new bookLoanListener());
 	  
+	  //Set panel for returning books 
+	  JPanel returnBookJPanel = new JPanel(new BorderLayout());
+	  t1.add("Return", returnBookJPanel);
+  
+	  returnbookJTable = new JTable( new Model( controller.queryBooksOnLoan()).getTableModel());
+	  JScrollPane returnbookJScrollPane =new JScrollPane(returnbookJTable);
+	  returnbookJScrollPane.setPreferredSize(new Dimension(0,220));
+	  returnBookJPanel.add(returnbookJScrollPane,BorderLayout.NORTH);
+	  JPanel returnBookCenterJPanel = new JPanel(new GridLayout(2,2));
+	  
+	 
+	  JLabel dateReturnJLabel = new JLabel("Date Returned:");
+	  JLabel dateReturnShowJLabel = new JLabel(dtf.format(now));  
+	  JButton returnButton = new JButton("Return");
+	  returnButton.addActionListener(new bookReturnListener());
+	 
+	  returnBookCenterJPanel.add(dateReturnJLabel);
+	  returnBookCenterJPanel.add(dateReturnShowJLabel);
+	  returnBookCenterJPanel.add(returnButton);
+	  
+	  returnBookJPanel.add(returnBookCenterJPanel, BorderLayout.CENTER);
+	   returnMessJLabel = new JLabel("Message:");
+	  returnMessJLabel.setBorder(BorderFactory.createEmptyBorder(10,10,10,0));
+	  returnBookJPanel.add(new JPanel().add(returnMessJLabel),BorderLayout.SOUTH); 
 	    //add main tab panel to JFrame
 	    this.add(t1);
 	    this.setVisible(true);
@@ -350,14 +363,14 @@ public class View extends JFrame {
     	return  model.getTableModel();
 		
 	}
-	//query all borrower
-	private void queryAllBorrower()throws SQLException{
+	//Get  borrower combo box string
+	private DefaultComboBoxModel<String> queryAllBorrower()throws SQLException{
 		 ResultSet borrResultSetRslt = new Controller().queryAllBorrowers();
 		  Model borrowerRsltmodel = new Model(borrResultSetRslt);
-		  borrowerRsltComBox = borrowerRsltmodel.getComboBoxModel("Last_name","first_Name");	
+		  return  borrowerRsltmodel.getComboBoxModel("Last_name","first_Name");	
 	}
 
-	//query all authors
+	//Get  authors combJbox string 
 	private void queryAllAuthors() throws SQLException{
 		ResultSet authorRslt = controller.queryAllAuthors();
 	   Model authorRsltmodel = new Model(authorRslt);
@@ -483,14 +496,6 @@ public class View extends JFrame {
 			lastNameTextField.setText("");
 			firstNameTextFieldtext.setText("");
 			emailTextField.setText("");
-			
-			if(tableView.isShowing()) {
-				 ResultSet resultSet = controller.queryAllBorrowers();
-		   	 Model model =  new Model(resultSet);	 	   
-		   	 TableModel tableModel =model.getTableModel();
-		   	 tableView.jTable.setModel(tableModel);
-			}
-		
 			}
 			
 			
@@ -502,19 +507,21 @@ public class View extends JFrame {
 				
 				int returnedValue =controller.updateBorrower(lastName, fristName, email);
 				BorrowMessagJLabel.setText("Update completed, "+lastName+"'s new email is "+ email);
-				emailTextField.setText("");
-				if(tableView.isShowing()) {
-					
-					 ResultSet resultSet = controller.queryAllBorrowers();
-			   	 Model model =  new Model(resultSet);
-			 	   
-			   	 TableModel tableModel =model.getTableModel();
-			   	 tableView.jTable.setModel(tableModel);
-				}
-					
-				
+				emailTextField.setText("");		
 			}
 				
+			  borrowerRsltComBox = queryAllBorrower();
+		     borrowerRsltComBox2 = queryAllBorrower();
+	        borrowListBox.setModel(borrowerRsltComBox2);
+		     borrowerComboBox.setModel(borrowerRsltComBox);
+			if(tableView.isShowing()) {
+				
+				 ResultSet resultSet = controller.queryAllBorrowers();
+		   	 Model model =  new Model(resultSet);
+		 	   
+		   	 TableModel tableModel =model.getTableModel();
+		   	 tableView.jTable.setModel(tableModel);
+			}
 			}//end try
 			catch(SQLException ex)
 			{
@@ -596,7 +603,85 @@ public class View extends JFrame {
 		 
 	 }
 	 
-	 
+	 private class bookLoanListener implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			 try {
+				  int rowIndex = booklisTable.getSelectedRow();
+				 String title = (String) booklisTable.getValueAt(rowIndex, 0); //get book title  in the table
+				 
+				 String dateDueString =  datedueJLabel2.getText(); //get date due 
+				 String commentString  = commenTextField.getText();
+				 String nameString = borrowListBox.getSelectedItem().toString();
+			   	String []nameStrings = nameString.split(",");
+			   	String lastName = nameStrings[0];
+			   	String firstName = nameStrings[1];
+				   controller.bookLoan(title,commentString,lastName,firstName,dateDueString);
+				   commenTextField.setText("");
+				  
+				   bookLoanMessageJLabel.setText(lastName +" "+firstName+" borrowed "+title);
+				   
+				   //update book list
+				   TableModel tableModel =queryBooksInLibrary();
+				   booklisTable.setModel(tableModel);
+				   returnbookJTable.setModel(new Model( controller.queryBooksOnLoan()).getTableModel());
+				   if(tableView.isShowing()) {
+				   	  if(rb1.isSelected()) 
+				   	 tableView.jTable.setModel(tableModel);	
+				   	  
+				   	  if(rb2.isSelected()) 
+				   	 tableView.jTable.setModel( new Model(controller.queryBooksOnLoan()).getTableModel());
+					}
+				   
+				  }
+					catch(SQLException ex)
+					{
+						System.out.println("SQL Exception, message is: " + ex.getMessage());
+					}
+					catch(Exception ex)
+					{
+						System.out.println("Some other Exception, message is: " + ex.getMessage());
+					}
+		}	 
+	 }
+	 private class bookReturnListener implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			try {
+		 int row = 	returnbookJTable.getSelectedRow();
+		 String booktitleString  =(String) returnbookJTable.getValueAt(row, 0);
+		 String borrowerFirstNameString  = (String) returnbookJTable.getValueAt(row, 1);
+		 String borrowerLastNameString  = (String) returnbookJTable.getValueAt(row, 2);
+		 
+		 controller.bookReturn(booktitleString, borrowerFirstNameString, borrowerLastNameString);	 
+		 returnMessJLabel.setText(borrowerFirstNameString +" "+borrowerLastNameString+" returned "+booktitleString);
+		 TableModel tableModel =queryBooksInLibrary();
+		  
+		 booklisTable.setModel(tableModel);
+		   returnbookJTable.setModel(new Model( controller.queryBooksOnLoan()).getTableModel());
+		   if(tableView.isShowing()) {
+		   	  if(rb1.isSelected()) 
+		   	 tableView.jTable.setModel(tableModel);	
+		   	  
+		   	  if(rb2.isSelected()) 
+		   	 tableView.jTable.setModel( new Model(controller.queryBooksOnLoan()).getTableModel());
+			}
+		   
+		  
+		}	 
+			catch(SQLException ex)
+			{
+				System.out.println("SQL Exception, message is: " + ex.getMessage());
+			}
+			catch(Exception ex)
+			{
+				System.out.println("Some other Exception, message is: " + ex.getMessage());
+			}
+		}
+		
+	 }
 	 
 	 public static void main(String[] args) {
 		try {

@@ -39,7 +39,7 @@ public class Controller {
 		 		"ON b.BookID = bl.Book_BookID \r\n" + 
 		 		"INNER JOIN borrower AS br\r\n" + 
 		 		"ON br.Borrower_ID = bl.Borrower_Borrower_ID\r\n" +
-		 		"WHERE b.Available =0");
+		 		"WHERE bl.Date_returned is null");
 			return myRslt;	 
 		 
 	 }
@@ -119,13 +119,21 @@ public class Controller {
 		 		"(`Last_Name`,`First_name`)\r\n" + 
 		 		"VALUES( '" +lastNameString+"', '"+firstNameString+"' );");
 		 
-		 myStmt.executeUpdate("INSERT INTO book\r\n" + 
-		 		"(`Title`,`ISBN`,`Edition_Number`,`Subject`,`Available`)\r\n" + 
-		 		"VALUES('"+titleString+" ','"+isbnString+"','"+editionNumString+"','"+subjectString+"',Available);");
+		 myPreparedStatement =myConn.prepareStatement("INSERT INTO book\r\n" + 
+			 		"(`Title`,`ISBN`,`Edition_Number`,`Subject`,`Available`)\r\n" + 
+			 		"VALUES(?,?,?,?,Available);"); 
+		 myPreparedStatement.setString(1, titleString);
+		 myPreparedStatement.setString(2, isbnString);
+		 myPreparedStatement.setString(3, editionNumString);
+		 myPreparedStatement.setString(4, subjectString);
+		 myPreparedStatement.executeUpdate();
 		 
-		 myStmt.executeUpdate("INSERT INTO book_author\r\n" + 
-		 		"(Book_BookID,Author_AuthorID)VALUES((SELECT BookID FROM book WHERE Title ='"+titleString+"' ),(SELECT AuthorID FROM author WHERE Last_Name ='"+lastNameString+"' AND First_name ='"+firstNameString+"'));");
-		 
+		 myPreparedStatement =myConn.prepareStatement("INSERT INTO book_author\r\n" + 
+			 		"(Book_BookID,Author_AuthorID)VALUES((SELECT BookID FROM book WHERE Title =? ),(SELECT AuthorID FROM author WHERE Last_Name =? AND First_name =?));");
+		 myPreparedStatement.setString(1, titleString);
+		 myPreparedStatement.setString(2, lastNameString);
+		 myPreparedStatement.setString(3, firstNameString);
+		 myPreparedStatement.executeUpdate();
 		 
 		
 	 }
@@ -134,21 +142,50 @@ public class Controller {
 		 myStmt.executeUpdate("INSERT INTO author\r\n" + 
 			 		"(`Last_Name`,`First_name`)\r\n" + 
 			 		"VALUES( '" +lastNameString+"', '"+firstNameString+"' );");
-		 myStmt.executeUpdate("INSERT INTO book_author\r\n" + 
-			 		"(Book_BookID,Author_AuthorID)VALUES((SELECT BookID FROM book WHERE Title ='"+titleString+"' ),(SELECT AuthorID FROM author WHERE Last_Name ='"+lastNameString+"' AND First_name ='"+firstNameString+"'));");
-
+		 myPreparedStatement =myConn.prepareStatement("INSERT INTO book_author\r\n" + 
+			 		"(Book_BookID,Author_AuthorID)VALUES((SELECT BookID FROM book WHERE Title =? ),(SELECT AuthorID FROM author WHERE Last_Name =? AND First_name =?));");
+		 myPreparedStatement.setString(1, titleString);
+		 myPreparedStatement.setString(2, lastNameString);
+		 myPreparedStatement.setString(3, firstNameString);
+		 myPreparedStatement.executeUpdate();
 	 } 
 	 
 	 
-	 public void bookLoan(String titleString, String comment,String lastName, String firstName)throws Exception {
+	 public void bookLoan(String titleString, String comment,String lastName, String firstName,String dateDueString)throws Exception {
 		 myPreparedStatement =myConn.prepareStatement("INSERT INTO book_loan(Book_BookID,Borrower_Borrower_ID,comment,Date_out,Date_due)\r\n" + 
-		 		"VALUES((SELECT BookID FROM book WHERE Title =? AND Available =1),(SELECT Borrower_ID FROM borrower WHERE First_Name =? AND Last_Name =?),?, sysdate(), adddate(sysdate(),15));");
+		 		"VALUES((SELECT BookID FROM book WHERE Title =? AND Available =1),(SELECT Borrower_ID FROM borrower WHERE First_Name =? AND Last_Name =?),?, sysdate(),?);");
 		 myPreparedStatement.setString(1, titleString);
 		 myPreparedStatement.setString(2, firstName);
 		 myPreparedStatement.setString(3, lastName);
 		 myPreparedStatement.setString(4, comment);
+		 myPreparedStatement.setString(5, dateDueString);
 		 myPreparedStatement.executeUpdate();
-		 myStmt.executeUpdate(" UPDATE book SET Available = 0 WHERE Title ='"+titleString+ "' AND Available =1;" );
+		 myPreparedStatement =myConn.prepareStatement("UPDATE book SET Available = 0 WHERE Title =? AND Available =1;");
+		 myPreparedStatement.setString(1, titleString);
+		 myPreparedStatement.executeUpdate();
+		
 	 }
-}
+	 
+	 public void bookReturn(String title,String firstnameString, String lastName)throws Exception {
+		 int bookID=0, borrowerID=0 ;
+	
+		 myPreparedStatement =myConn.prepareStatement("SELECT BookID FROM book WHERE Title =? AND Available =0; ");
+		 myPreparedStatement.setString(1, title);
+		 myRslt = myPreparedStatement.executeQuery();
+		 myRslt.next();
+			 bookID = myRslt.getInt("BookID");
+		
+	      myRslt  =myStmt.executeQuery("SELECT Borrower_ID FROM borrower WHERE First_Name ='"+firstnameString+"' AND Last_Name ='"+lastName+"' ");
+	      myRslt.next();
+			 borrowerID = myRslt.getInt("Borrower_ID");
+			 
+			myStmt.executeUpdate("UPDATE book_loan SET Date_returned =sysdate() WHERE Book_BookID = "+bookID+"  AND Borrower_Borrower_ID =" +borrowerID+";");
+		
+			 myPreparedStatement =myConn.prepareStatement("UPDATE book SET Available = 1 WHERE Title =? AND Available =0;");
+			 myPreparedStatement.setString(1, title);
+			 myPreparedStatement.executeUpdate();
+		
+		}
+	 }
+
 //end class
