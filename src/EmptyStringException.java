@@ -1,7 +1,7 @@
 /**
  *Program:EmptyStringException.java
  *Purpose:
- *Author:Gang
+ *Author:Gang,An
  *Date:Jul. 18, 2019
  *
  */

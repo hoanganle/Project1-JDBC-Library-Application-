@@ -1,7 +1,7 @@
 /**
  *Program:Controller.java
  *Purpose:
- *Author:Gang
+ *Author:Gang,An
  *Date:Jul. 27, 2019
  *
  */
