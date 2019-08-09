@@ -18,7 +18,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-public class View extends JFrame {
+import java.util.regex.Pattern;
+public class View extends JFrame  implements ActionListener{
    Controller controller;
 	TableView tableView;
 	JTabbedPane t1; //main tab panel
@@ -36,6 +37,7 @@ public class View extends JFrame {
    JTextField titleTextField,isbnJTextField,editionNumJTextField,subjecTextField,authorLastNameJTextField,authorFirstNameJTextField;
    JLabel BorrowMessagJLabel,bookMessagJLabel,  returnMessJLabel,bookLoanMessageJLabel,datedueJLabel2;
    JCheckBox addMoreAuthourCheckBox;
+
 	public View () throws SQLException {
 		super("Gui");//will go into title bar		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//object becomes garbage when closed
@@ -45,7 +47,7 @@ public class View extends JFrame {
 	  //main tab panel
 		 t1=new JTabbedPane();
 	  
-	   
+		
 	  
 //set search book panel
 	    //set comboBox to show all authors
@@ -85,15 +87,15 @@ public class View extends JFrame {
 	    jc2 =new JComboBox<>(authorRsltComBox);
 	    jc2.setVisible(false);
 	    jb1 = new JButton("View");
-	  
-	 
+	    JButton closeButton3 = new JButton("Close");
+	    closeButton3.addActionListener(this);
 	    ButtonGroup bg=new ButtonGroup();  
 	    bg.add(rb1);
 	    bg.add(rb2);
 	    bg.add(rb3);
 	    bg.add(rb4);
        bg.add(rb5);
-       
+
        p2.setLayout(new GridLayout(6, 2));
 	    p2.add(rb1);
 	    p2.add(new JLabel(""));
@@ -107,6 +109,7 @@ public class View extends JFrame {
 		 p2.add(rb5);
 	    p2.add(new JLabel(""));
        p2.add(jb1);       
+       p2.add(closeButton3);
        t1.addTab("Search Books", p2);
 	   
   //set tab panel for updating books and borrowers
@@ -142,7 +145,7 @@ public class View extends JFrame {
     
      //Add listener for radio button
      addBorroweRadioButton.addItemListener((e)->{
-   	 BorrowMessagJLabel.setText("");
+   	 BorrowMessagJLabel.setText("Message:");
         borrowerComboBox.setVisible(false);
         lastNameTextField.setEditable(true);
    	  firstNameTextFieldtext.setEditable(true);
@@ -152,7 +155,7 @@ public class View extends JFrame {
      });
      
      updateBorroweRadioButton.addItemListener((e)->{
-   	  BorrowMessagJLabel.setText("");
+   	  BorrowMessagJLabel.setText("Message:");
    	  borrowerComboBox.setVisible(true);
    	  lastNameTextField.setEditable(false);
    	  firstNameTextFieldtext.setEditable(false);
@@ -186,7 +189,9 @@ public class View extends JFrame {
      borrowerPanel.add(emaiLabel);
      borrowerPanel.add(emailTextField);
      borrowerPanel.add(borrowButton);
-     	    
+     JButton closeBtn = new JButton("Close");
+     closeBtn.addActionListener(this);
+     borrowerPanel.add(closeBtn);
      //set action listener for button
      borrowButton.addActionListener(new borrowButtonListener());
      
@@ -202,7 +207,7 @@ public class View extends JFrame {
      
  //set book panel
      JPanel  bookJPanel = new JPanel();
-     bookJPanel.setLayout(new GridLayout(7, 2));
+     bookJPanel.setLayout(new GridLayout(8, 2));
      
      JLabel titleJLabel =new JLabel("Title:");
       titleTextField =new JTextField();
@@ -216,17 +221,19 @@ public class View extends JFrame {
       authorLastNameJTextField =new JTextField();
      JLabel authorFirstNameJLabel =new JLabel("Authour First Name:");
       authorFirstNameJTextField =new JTextField();
+      JLabel instructions = new JLabel("click check box first if adding more authors");
       addBookButton = new JButton("Add");
      addBookButton.addActionListener(new bookButtonListener() );
       addMoreAuthourCheckBox = new JCheckBox("Add More Authors");
-      
+      JButton closeButton5 = new JButton("Close");
+      closeButton5.addActionListener(this);
       addMoreAuthourCheckBox.addItemListener((e)->{
 	   	 if(!addMoreAuthourCheckBox.isSelected()) {
 	   		 titleTextField.setVisible(true);
 					isbnJTextField.setVisible(true);
 					editionNumJTextField.setVisible(true);
 					subjecTextField.setVisible(true);
-	   		   bookMessagJLabel.setText("");
+	   		   bookMessagJLabel.setText("Message:");
 	   		   
 				   titleTextField.setText("");
 				   isbnJTextField.setText("");
@@ -250,8 +257,10 @@ public class View extends JFrame {
      bookJPanel.add(authorLastNameJTextField);
      bookJPanel.add(authorFirstNameJLabel);
      bookJPanel.add(authorFirstNameJTextField);
-     bookJPanel.add(addBookButton);
      bookJPanel.add(addMoreAuthourCheckBox);
+     bookJPanel.add(instructions);
+     bookJPanel.add(addBookButton);
+     bookJPanel.add(closeButton5);
      
      JPanel bookMainPanel =new JPanel();
      bookMainPanel.setLayout(new BorderLayout());
@@ -296,7 +305,8 @@ public class View extends JFrame {
 	  JLabel dateDueJLabel = new JLabel("Date Due:");	 
 	   datedueJLabel2 = new JLabel(dtf.format( now.plusDays(14)));
 	  JButton submitButton =new JButton("Submit");
-	  
+	  JButton closeButton = new JButton("Close");
+	  closeButton.addActionListener(this);
 	  // 
 	  oneWeekButton.addItemListener((e)->{
 		  datedueJLabel2.setText(dtf.format( now.plusDays(7)));
@@ -316,6 +326,9 @@ public class View extends JFrame {
 	  bookFormJPanel.add(dateDueJLabel);
 	  bookFormJPanel.add(datedueJLabel2);
 	  bookFormJPanel.add(submitButton);
+	 
+	  bookFormJPanel.add(closeButton);
+	  
 	  bookLoanJPanel.add(bookFormJPanel, BorderLayout.CENTER);
 	  
 	    bookLoanMessageJLabel = new JLabel("Message:");
@@ -340,11 +353,12 @@ public class View extends JFrame {
 	  JLabel dateReturnShowJLabel = new JLabel(dtf.format(now));  
 	  JButton returnButton = new JButton("Return");
 	  returnButton.addActionListener(new bookReturnListener());
-	 
+	  JButton closeButton2 = new JButton("Close");
+	  closeButton2.addActionListener(this);
 	  returnBookCenterJPanel.add(dateReturnJLabel);
 	  returnBookCenterJPanel.add(dateReturnShowJLabel);
 	  returnBookCenterJPanel.add(returnButton);
-	  
+	  returnBookCenterJPanel.add(closeButton2);
 	  returnBookJPanel.add(returnBookCenterJPanel, BorderLayout.CENTER);
 	   returnMessJLabel = new JLabel("Message:");
 	  returnMessJLabel.setBorder(BorderFactory.createEmptyBorder(10,10,10,0));
@@ -352,6 +366,8 @@ public class View extends JFrame {
 	    //add main tab panel to JFrame
 	    this.add(t1);
 	    this.setVisible(true);
+	    
+		
 	}
 	
 	//query Books In Library
@@ -483,28 +499,41 @@ public class View extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			try {
-			if(addBorroweRadioButton.isSelected()) {
-				BorrowMessagJLabel.setText("");
-		   String lastName =	lastNameTextField.getText();
-			String fristName =firstNameTextFieldtext.getText();
+		try {
+				 
+			String lastName =	lastNameTextField.getText();				
+			String fristName =firstNameTextFieldtext.getText();				
 			String email = emailTextField.getText();
-			
-			int returnedValue =controller.addBorrower(lastName, fristName, email);
-			BorrowMessagJLabel.setText("Add completed, "+lastName+" "+fristName+" Added.");
-			//clear text field
-			lastNameTextField.setText("");
-			firstNameTextFieldtext.setText("");
-			emailTextField.setText("");
+					
+			//validate 				 
+			if(lastName.trim().isEmpty() )
+					 {					 
+						 throw new EmptyStringException(1);
+					 }
+						 				 
+			else if( fristName.trim().isEmpty())
+					 {						 
+						 throw new EmptyStringException(2);
+					 }
+						 				
+			else if( email.trim().isEmpty())
+					 {					 
+						 throw new EmptyStringException(3);
+					 }
+
+					
+			if(addBorroweRadioButton.isSelected()) {
+				BorrowMessagJLabel.setText("");			
+				int returnedValue =controller.addBorrower(lastName, fristName, email);			
+				BorrowMessagJLabel.setText("Add completed, "+lastName+" "+fristName+" Added.");			
+				//clear text field			
+				lastNameTextField.setText("");		
+				firstNameTextFieldtext.setText("");		
+				emailTextField.setText("");
 			}
 			
 			
-			else if (updateBorroweRadioButton.isSelected()) {		
-				
-			   String lastName =	lastNameTextField.getText();
-				String fristName =firstNameTextFieldtext.getText();
-				String email = emailTextField.getText();
-				
+			else if (updateBorroweRadioButton.isSelected()) {						
 				int returnedValue =controller.updateBorrower(lastName, fristName, email);
 				BorrowMessagJLabel.setText("Update completed, "+lastName+"'s new email is "+ email);
 				emailTextField.setText("");		
@@ -514,15 +543,36 @@ public class View extends JFrame {
 		     borrowerRsltComBox2 = queryAllBorrower();
 	        borrowListBox.setModel(borrowerRsltComBox2);
 		     borrowerComboBox.setModel(borrowerRsltComBox);
-			if(tableView.isShowing()) {
-				
+			
+		     if(tableView.isShowing()) {				
 				 ResultSet resultSet = controller.queryAllBorrowers();
-		   	 Model model =  new Model(resultSet);
-		 	   
+		   	 Model model =  new Model(resultSet);	 	   
 		   	 TableModel tableModel =model.getTableModel();
 		   	 tableView.jTable.setModel(tableModel);
 			}
+		
 			}//end try
+		
+		catch (EmptyStringException  e1) {
+			// TODO: handle exception
+			 JOptionPane.showMessageDialog(null, "Empty Input. Please Enter again!");
+			 if(e1.flag ==1) {
+				 lastNameTextField.setText("");
+				 lastNameTextField.requestFocusInWindow();
+			 }
+			 
+			 
+			 else if(e1.flag ==2) { 				
+				 firstNameTextFieldtext.setText(""); 
+				 firstNameTextFieldtext.requestFocusInWindow();
+				 }
+			 
+			 else if(e1.flag ==3) { 				
+				 emailTextField.setText(""); 
+				 emailTextField.requestFocusInWindow();
+				 }
+				
+		}
 			catch(SQLException ex)
 			{
 				System.out.println("SQL Exception, message is: " + ex.getMessage());
@@ -531,6 +581,7 @@ public class View extends JFrame {
 			{
 				System.out.println("Some other Exception, message is: " + ex.getMessage());
 			}
+			
 			
 		}}//end method
 	 //book button listener
@@ -545,6 +596,45 @@ public class View extends JFrame {
 				String subjectString=   subjecTextField.getText();
 				String lastNameString=   authorLastNameJTextField.getText();
 				String firstNameString=   authorFirstNameJTextField.getText();
+				
+				 if(titleString.trim().isEmpty() )
+				 {
+					 
+					 throw new EmptyStringException(1);
+				 }
+					 
+				 else if( isbnString.trim().isEmpty())
+				 {
+					 
+					 throw new EmptyStringException(2);
+				 }
+				 
+				 else if( editionNumString.trim().isEmpty())
+				 {
+					 
+					 throw new EmptyStringException(3);
+				 }
+				 else if( subjectString.trim().isEmpty())
+				 {
+					 
+					 throw new EmptyStringException(4);
+				 }
+				 else if( lastNameString.trim().isEmpty())
+				 {
+					 
+					 throw new EmptyStringException(5);
+				 }
+				 else if( firstNameString.trim().isEmpty())
+				 {
+					 
+					 throw new EmptyStringException(6);
+				 }
+					 
+				if( !Pattern.matches("\\d{13}", isbnString))
+					 throw new NumberFormatException();
+				
+				if( !Pattern.matches("\\d{1,3}", editionNumString))
+					 throw new EmptyStringException(8);
 				
 			if	(e.getActionCommand()=="Add more authors" &&addMoreAuthourCheckBox.isSelected()) {
 	         controller.addMoreAuthor(titleString,lastNameString,firstNameString);
@@ -580,16 +670,65 @@ public class View extends JFrame {
 			   authorLastNameJTextField.setText("");
 			   authorFirstNameJTextField.setText("");
 			}
-			if(tableView.isShowing()) {
-				TableModel tableModel =queryBooksInLibrary();
+			TableModel tableModel =queryBooksInLibrary();
+
+		   booklisTable.setModel(tableModel);
+		   queryAllAuthors();
+		   queryAllSubject();
+		    jc1.setModel(subjectRsltComBox); //update  combo box
+		    jc2.setModel(authorRsltComBox); //update  combo box
+			
+		    if(tableView.isShowing()) {	
 				tableView.jTable.setModel(tableModel);
 			}
-		
-			  queryAllAuthors();
-			  queryAllSubject();
-			    jc1.setModel(subjectRsltComBox); //update  combo box
-			    jc2.setModel(authorRsltComBox); //update  combo box
+			
+			  
+			}//end try
+			
+			catch (EmptyStringException  e1) {
+				// TODO: handle exception
+				  if(e1.flag ==8) { 
+				    JOptionPane.showMessageDialog(null, "Input should be  1 to 3 digits. Please Enter again!");			
+					 editionNumJTextField.setText("");
+					 editionNumJTextField.requestFocusInWindow();	
+				 }
+				  else {
+				 JOptionPane.showMessageDialog(null, "Empty Input. Please Enter again!");
+				 if(e1.flag ==1) {
+					 titleTextField.setText("");
+					 titleTextField.requestFocusInWindow();
+				 }
+				 
+				 
+				 else if(e1.flag ==2) { 
+					
+					 isbnJTextField.setText(""); 
+					 isbnJTextField.requestFocusInWindow();}
+				 else if(e1.flag ==3) { 
+						
+					 editionNumJTextField.setText(""); 
+					 editionNumJTextField.requestFocusInWindow();}
+				 else if(e1.flag ==4) { 
+						
+					 subjecTextField.setText(""); 
+					 subjecTextField.requestFocusInWindow();}
+				 else if(e1.flag ==5) { 
+						
+					 authorLastNameJTextField.setText(""); 
+					 authorLastNameJTextField.requestFocusInWindow();}
+				 else if(e1.flag ==6) { 
+						
+					 authorFirstNameJTextField.setText(""); 
+					 authorFirstNameJTextField.requestFocusInWindow();}
+				  }
 			}
+			
+			 catch (NumberFormatException e1) {
+				 JOptionPane.showMessageDialog(null, "Input should be thirteen digits. Please Enter again!");			
+				 isbnJTextField.setText("");
+				 isbnJTextField.requestFocusInWindow();		 
+			}
+			
 			catch(SQLException ex)
 			{
 				System.out.println("SQL Exception, message is: " + ex.getMessage());
@@ -683,6 +822,9 @@ public class View extends JFrame {
 		
 	 }
 	 
+
+	 
+
 	 public static void main(String[] args) {
 		try {
 			 View view =new View();
@@ -696,6 +838,14 @@ public class View extends JFrame {
 		{
 			System.out.println("Some other Exception, message is: " + ex.getMessage());
 		}
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub	
+			this.dispose();
+			if(tableView !=null)
+			tableView.dispose();			
 	}
 
 }
